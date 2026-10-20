@@ -1,0 +1,12 @@
+// resource.rc
+// NOTE: keep this file ASCII-only. rc.exe reads files as the ANSI code page (CP932 on
+// Japanese Windows), so UTF-8 comments can break the resource compile.
+//
+// wxUSE_RC_MANIFEST is defined automatically for MinGW (windres) but not for MSVC rc.exe.
+#ifndef wxUSE_RC_MANIFEST
+    #define wxUSE_RC_MANIFEST 1
+#endif
+// Enable Per-Monitor v2 DPI awareness
+#define wxUSE_DPI_AWARE_MANIFEST 2
+// Common Controls v6 (visual styles) and DPI-aware manifest
+#include <wx/msw/wx.rc>

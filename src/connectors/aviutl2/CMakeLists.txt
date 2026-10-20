@@ -21,6 +21,7 @@ add_library(${PROJECT_NAME} SHARED)
 target_sources(${PROJECT_NAME} PRIVATE
     src/main.cpp
     src/ui/mainframe.cpp
+    src/ipc/host_client.cpp
     src/utils/dpi_patch.cpp
 )
 
@@ -31,6 +32,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 target_include_directories(${PROJECT_NAME} PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../common
     ${COMET_INCLUDE_DIR}/aviutl2_sdk_mirror/include
     ${COMET_INCLUDE_DIR}/wxCustomControls/src
 )
@@ -50,4 +52,5 @@ set_property(TARGET ${PROJECT_NAME} PROPERTY
 target_link_libraries(${PROJECT_NAME} PRIVATE
     wxWidgets::wxWidgets
     comctl32
+    ws2_32
 )
