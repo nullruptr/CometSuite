@@ -12,7 +12,8 @@ bool App::OnInit()
 
     auto* frame = new MainFrame();
     // コンストラクタ内で FromDIP するとクラッシュするため、サイズは生成後に設定する
-    frame->SetSize(frame->FromDIP(wxSize(1280, 720)));
+    frame->ApplySizes();
+    frame->SetSize(frame->FromDIP(wxSize(500, 700)));
     frame->Show();
     return true;
 }

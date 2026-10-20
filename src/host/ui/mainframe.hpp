@@ -2,17 +2,17 @@
 #include <wx/wx.h>
 #include "ipc/ipc_server.hpp"
 
-namespace cm {
-
 class MainFrame : public wxFrame {
 public:
     MainFrame();
     ~MainFrame() override;
 
+    void ApplySizes();
+
 private:
     void StartIpc();
 
-    IpcServer m_server;
+    wxButton* m_mta_button = nullptr;
+    wxButton* m_exit_button = nullptr;
+    cm::IpcServer m_server;
 };
-
-} // namespace cm

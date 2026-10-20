@@ -17,17 +17,11 @@ bool FileExists(const std::wstring& path)
     return attr != INVALID_FILE_ATTRIBUTES && !(attr & FILE_ATTRIBUTE_DIRECTORY);
 }
 
-// host の実行ファイルを探す。
-//   1. 環境変数 COMETSUITE_HOST_EXE (開発中に、ビルド出力を直接指すための上書き)
-//   2. このプラグイン (.aux2) と同じフォルダの CometSuite.exe
-//   3. 同じフォルダの CometSuite\CometSuite.exe
+// host の実行ファイルの場所を返す。
+//   このプラグイン (.aux2) と同じフォルダの CometSuite\CometSuite.exe のみ。
+// 見つからなければ空文字列。
 std::wstring ResolveHostExe()
 {
-    wchar_t env[MAX_PATH] = {};
-    const DWORD n = GetEnvironmentVariableW(L"COMETSUITE_HOST_EXE", env, MAX_PATH);
-    if (n > 0 && n < MAX_PATH && FileExists(env))
-        return env;
-
     HMODULE module = nullptr;
     if (!GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
                             reinterpret_cast<LPCWSTR>(&ResolveHostExe), &module))
@@ -39,12 +33,8 @@ std::wstring ResolveHostExe()
     std::wstring dir(path);
     dir = dir.substr(0, dir.find_last_of(L"\\/") + 1);
 
-    for (const wchar_t* candidate : {L"CometSuite.exe", L"CometSuite\\CometSuite.exe"}) {
-        const std::wstring full = dir + candidate;
-        if (FileExists(full))
-            return full;
-    }
-    return L"";
+    const std::wstring exe = dir + L"CometSuite\\CometSuite.exe";
+    return FileExists(exe) ? exe : L"";
 }
 
 // CometSuite.exe を起動する。AviUtl2 の終了とは独立して動く別プロセス。
@@ -129,7 +119,7 @@ void HostClient::Run()
         if (!launched) {
             launched = true;
             if (!LaunchHost()) {
-                Report(L"Cannot find CometSuite.exe (set COMETSUITE_HOST_EXE or put it next to the plugin)");
+                Report(L"Cannot find CometSuite\\CometSuite.exe next to the plugin");
                 m_running = false;
                 return;
             }
