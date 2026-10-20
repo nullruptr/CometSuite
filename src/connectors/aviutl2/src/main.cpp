@@ -2,7 +2,9 @@
 #include <windows.h>
 #include <wx/wx.h>
 #include "aviutl2_sdk/plugin2.h"
+#include "aviutl2_sdk/config2.h"
 #include "ui/mainframe.hpp"
+#include "utils/get_colour.hpp"
 
 namespace {
 HINSTANCE g_hModule = nullptr;
@@ -17,6 +19,12 @@ COMMON_PLUGIN_TABLE g_plugin_table = {
 
 // 本体のメインウィンドウ取得 (get_host_app_window) 用。mainframe.cpp から参照する。
 EDIT_HANDLE* g_edit_handle = nullptr;
+
+// 設定関連の初期化。InitializePlugin / RegisterPlugin より先に呼ばれる。
+EXTERN_C __declspec(dllexport) void InitializeConfig(CONFIG_HANDLE* handle)
+{
+    cm::theme::SetConfig(handle);
+}
 
 EXTERN_C __declspec(dllexport) COMMON_PLUGIN_TABLE* GetCommonPluginTable(void)
 {

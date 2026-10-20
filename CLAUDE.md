@@ -37,8 +37,17 @@ CometSuite/
 
 #### 対処
 
-- モーダルを出す前に、GetAncestor(self, GA_ROOT)と、get_host_app_window()の両者のHWNDを EnableWindow(FALSE) で無効にし、閉じたら TRUE に戻す。
+- モーダルを出す前に、AviUtl2 のメインスレッドの最上位ウィンドウをすべて EnableWindow(FALSE) で無効にし、閉じたら TRUE に戻す。
+  本体と自分の root (GetAncestor(self, GA_ROOT)) だけでは足りない。別のプラグインが非ドッキングで表示しているウィンドウが
+  有効なまま残り、クリックするとダイアログより前面に出てしまうため。
   これで、wxMessageBox, wxDialog 系は使えるようになる。
+- ダイアログを閉じる (非表示にする) 前に、無効にしたウィンドウを有効に戻すこと。
+  全て無効なままダイアログが消えると、Windows は次に前面にするウィンドウを AviUtl2 の外から選んでしまい
+  (直前に使っていた別アプリが前面に出る)、その後の SetForegroundWindow も拒否される。
+  先に有効に戻せば、ダイアログが消えたときにオーナーが通常どおりアクティブになる。
+- 実装は `src/utils/modal_guard.hpp` の `ModalGuard` (ダイアログを作る前にスコープ内に置く)。
+  `Release()` で有効に戻せる。`src/utils/message_box.hpp` の `cm::ShowMessageBox` は、
+  `EndModal` をオーバーライドして閉じる前に `Release()` している。
 
 ### wxWidgets の High DPI (DLL)
 
