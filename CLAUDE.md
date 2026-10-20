@@ -1,5 +1,10 @@
 # CLAUDE.md
 
+## 共通
+
+冗長なコメントは避けること。
+シンプルかつ簡潔に。
+
 ## ディレクトリ構成(予定)
 
 ```
@@ -24,15 +29,50 @@ CometSuite/
 
 ## wxWidgets (DLL)
 
-- コネクタ(DLL)側において、イベントループの関係で、モーダルが機能しない。
-従って、wxMessageBox などは使えないので、WinAPI 側の MessageBoxを使うこと。
-どうしても、wxDialog したいなら、描画前に、EnableWindow(hwnd, FALSE)後に、描画すること。
+- コネクタ(DLL)側において、wx 系の wxMessageBox や、 wxDialog::ShowModal などのモーダル表示を伴う物は、正常にモーダル表示されない。
+  wxWidgetsは自分のトップレベルウィンドウしか無効化しないため、AviUtl2 本体がロックされないのが原因。
+- 登録した wxWidgets の HWNDは WS_CHILD にされ、AviUtl2 のaviutl2Managerコンテナの子になる。
+  - ドッキング時　：get_host_app_window()と同じHWNDになる。
+  - 非ドッキング時：本体がオーナーの、違うHWNDになる。
+
+#### 対処
+
+- モーダルを出す前に、GetAncestor(self, GA_ROOT)と、get_host_app_window()の両者のHWNDを EnableWindow(FALSE) で無効にし、閉じたら TRUE に戻す。
+  これで、wxMessageBox, wxDialog 系は使えるようになる。
+
+### wxWidgets の High DPI (DLL)
+
+- 登録した子ウィンドウは、`WS_CHILD`である。従って、`WM_DPICHANGED` が正常に届かない。
+  wxWidgets はWinAPIの`WM_DPICHANGED`のイベントに頼ってコントロールのサイズを再計算する仕様のため、以下の不具合が生じる。
+
+1. ドッキング切替でコントロールのみ縮む
+   - 文字は正常のサイズで描画される。
+   - 切替時の処理
+     - AviUtl2 が、いったん DPI 96 の仮のウィンドウを経由し、ドッキング。
+       このとき Windows から、`WM_DPICHANGED` (96) のmsgを受け取り、wxWidgets が 144 -> 96 の DPI 変更として扱ってコントロールを縮める。
+       `WM_DPICHANGED_AFTERPARENT` は、正常なDPI値を、`GetDpiForWindow(hwnd)`経由でとれるが、AFTERPARENT では、wxWidgets が再スケールしないため、縮んだまま残る。
+2. DPI の異なるモニターへ動かしても、サイズが追従しない
+   - 原因として、フレームは `WS_CHILD` のため、`WM_DPICHANGED` は最上位のコンテナにしか届かない。
+
+#### 対処
+
+- `MainFrame::SyncDpi` で、通知に頼らず自分で DPI を調べて適用すること。
+  - `WM_SIZE` / `WM_WINDOWPOSCHANGED` / `WM_DPICHANGED_AFTERPARENT` のたびに、
+    `GetDpiForWindow(self)` と最後に適用した DPI (`m_dpi`) を比べ、違えば
+    `MSWUpdateOnDPIChange(旧DPI, 新DPI)` を呼ぶ。
+  - 仮の親にいる(`GA_ROOT` のクラスが `aviutl2Manager` でない)間は何もしない。
+  - wx 内部の `m_activeDPI` は private で更新できない。従って、DPI は `m_dpi` で自前管理。
+    `WM_DPICHANGED` は 二重にスケーリングされるのを防ぐため、wx 側に渡さずに捨てる。
+  - `wxWindow::Layout()` は自分の sizer しか配置せず、子パネルはサイズ変更が来るまで再配置されない。
+    DPI 適用後は `RelayoutAll` で子孫の `Layout()` を再帰的に呼ぶ。
+
+  - これらの処理は、AviUtl2 の更新でクラス名が変わると、症状 1 が再発する
 
 ## wxWidgets (共通)
 
 - 必ず、FromDIPすること。なお、コンストラクタで、FromDIP したらクラッシュするので、後から明示的にSetSize すること。
-例えば、SetSize(FromDIP(wxSize(800, 600))); 等で対応する。
-- GUI は英語で記述する。日本語対応も視野に入れているので、テキストは_("foo") と書くこと。
+  例えば、SetSize(FromDIP(wxSize(800, 600))); 等で対応する。
+- GUI は英語で記述する。日本語対応も視野に入れているので、テキストは\_("foo") と書くこと。
 
 ## 利用技術
 

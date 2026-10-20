@@ -1,0 +1,6 @@
+[submodule "src/include/aviutl2_sdk_mirror"]
+	path = src/include/aviutl2_sdk_mirror
+	url = https://github.com/aviutl2/aviutl2_sdk_mirror
+[submodule "src/include/wxCustomControls"]
+	path = src/include/wxCustomControls
+	url = https://github.com/nullruptr/wxCustomControls

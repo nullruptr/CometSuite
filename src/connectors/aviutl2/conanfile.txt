@@ -1,0 +1,12 @@
+[requires]
+wxwidgets/3.2.10
+
+[options]
+wxwidgets/*:shared=False
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[layout]
+cmake_layout
