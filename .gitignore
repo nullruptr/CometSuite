@@ -201,3 +201,6 @@ config.*
 # Ignore compile_flags
 compile_flags.*
 compile_commands.*
+
+# .vscode
+.vscode/

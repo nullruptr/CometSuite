@@ -14,6 +14,7 @@ endif()
 find_package(wxWidgets CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
 find_package(Eigen3 CONFIG REQUIRED)
+find_package(imgui CONFIG REQUIRED)
 
 # リポジトリ内の src/include (サブモジュール)
 set(COMET_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
@@ -54,5 +55,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     wxWidgets::wxWidgets
     opencv::opencv
     Eigen3::Eigen
+    imgui::imgui
     ws2_32
 )

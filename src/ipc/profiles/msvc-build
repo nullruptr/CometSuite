@@ -1,0 +1,14 @@
+[settings]
+arch=x86_64
+build_type=Release
+compiler=msvc
+compiler.cppstd=20
+compiler.runtime=static
+compiler.runtime_type=Release
+compiler.version=193
+os=Windows
+
+[conf]
+# tool_requires (ビルドコンテキスト) 用。msvc-release/debug の [conf] は適用されないため、同じ /utf-8 指定を明示する。
+tools.build:cflags=["-utf-8"]
+tools.build:cxxflags=["-utf-8"]

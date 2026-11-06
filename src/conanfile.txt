@@ -2,10 +2,12 @@
 wxwidgets/3.2.10
 opencv/4.13.0
 eigen/3.4.1
+imgui/1.92.9b
 
 [options]
 wxwidgets/*:shared=False
 eigen/*:MPL2_only=True
+imgui/*:shared=False
 opencv/*:with_jpeg=False
 opencv/*:with_png=False
 opencv/*:with_tiff=False
